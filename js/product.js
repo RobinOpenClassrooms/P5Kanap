@@ -3,6 +3,7 @@ const urlParams = new URLSearchParams(queryString)
 const id = urlParams.get("id")
 if (id != null) {
     let itemPrice = 0
+    let imgUrl, altText
 }
 console.log({ id })
  
@@ -11,9 +12,10 @@ fetch(`http://localhost:3000/api/products/${id}`)
 .then((res) => handleData(res))
 
 function handleData(canapé) {
-    console.log({ canapé })
     const { altTxt, price, colors, description, imageUrl, name,} = canapé
     itemPrice = price
+    imgUrl = imageUrl
+    altText = altTxt
     makeImage2(imageUrl, altTxt)
     makeTitle(name)
     makePrice(price)
@@ -59,21 +61,36 @@ function makeColors(colors) {
 }
 
 const button = document.querySelector("#addToCart")
-if (button != null) {
-    button.addEventListener("click", (e) => {
-        const color = document.querySelector("#colors").value
-        const quantity = document.querySelector("#quantity").value
-        if (color == null || color === "" || quantity == null || quantity == 0) {
-            alert("Please select color AND quantity")
-        }
-       
-        const data = {
-            id: id,
-            color: color,
-            quantity: Number(quantity),
-            price: itemPrice,
-        }
-        localStorage.setItem(id, JSON.stringify(data))
-        window.location.href = "cart.html"
-    })
+button.addEventListener("click", handleClick)
+
+
+function handleClick() {
+    const color = document.querySelector("#colors").value
+    const quantity = document.querySelector("#quantity").value
+
+    if (isOrderInvalid(color, quantity)) return
+    saveOrder(color, quantity)
+    redirectToCart()
+}
+function saveOrder(color, quantity) {
+    const data = {
+        id: id,
+        color: color,
+        quantity: Number(quantity),
+        price: itemPrice,
+        imageUrl: imgUrl,
+        altTxt: altText
+    }
+    localStorage.setItem(id, JSON.stringify(data))
+}
+
+function isOrderInvalid(color, quantity) {
+    if (color == null || color === "" || quantity == null || quantity == 0) {
+        alert("Please select color AND quantity")
+        return true
+    }
+}
+
+function redirectToCart() {
+    window.location.href = "cart.html"
 }
