@@ -11,7 +11,7 @@ cart.forEach((item) => displayItem(item))
 function retrieveItemsFromCache() {
     const numberOfitems = localStorage.length    
     for (let i = 0; i < numberOfitems; i++) {
-        const item = localStorage.getItem(localStorage.key(i))
+        const item = localStorage.getItem(localStorage.key(i)) || "[]"
         const itemObject = JSON.parse(item)
         cart.push(itemObject)
      }
@@ -24,21 +24,34 @@ function displayItem(item) {
     const imageDiv = makeImageDiv(item)
     article.appendChild(imageDiv) 
 
-    const cardItemContent = makeDescription(imageDiv, item)
-    article.appendChild(cardItemContent)
+    makeCartContent(item)
     displayArticle(article)
+
+    const cartItemContent = makeCartContent(item)
+    article.appendChild(cartItemContent)
 }
 
-function makeCardItemContent() {
-    const div = document.createElement("div")
-    div.classList.add("card__item__content")
 
+function makeCartContent(item) {
+    const cartItemContent = document.createElement("div")
+    cartItemContent.classList.add("cart__item__content")
+
+    const description = makeDescription(item)
+    const settings = makeSettings(item)
+
+    cartItemContent.appendChild(description)
+    return cartItemContent
+    // cartItemContent.appendChild(settings)
 
 }
 
-function makeDescription(div, item) {
+function makeSettings(item) {
+ return ""
+}
+
+function makeDescription(item) {
     const description = document.createElement("div")
-    div.classList.add("card__item__content__description")
+    description.classList.add("cart__item__content__description")
 
     const h2 = document.createElement("h2") 
     h2.textContent = item.name
@@ -50,10 +63,7 @@ function makeDescription(div, item) {
     description.appendChild(h2)  
     description.appendChild(p)
     description.appendChild(p2)
-    div.appendChild(description)
-    console.log(div)
-    return div
-
+    return description
 }
 
 function displayArticle(article) {
@@ -65,7 +75,7 @@ function displayArticle(article) {
 
 function makeArticle(item) {
     const article = document.createElement("article")
-    article.classList.add("card__item")
+    article.classList.add("cart__item")
     article.dataset.id = item.id
     article.dataset.color = item.color
     // article.appendChild(makeTitle(item))
