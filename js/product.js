@@ -3,7 +3,7 @@ const urlParams = new URLSearchParams(queryString)
 const id = urlParams.get("id")
 if (id != null) {
     let itemPrice = 0
-    let imgUrl, altText
+    let imgUrl, altText, articleName
 }
 console.log({ id })
  
@@ -16,6 +16,7 @@ function handleData(canapé) {
     itemPrice = price
     imgUrl = imageUrl
     altText = altTxt
+    articleName = name
     makeImage2(imageUrl, altTxt)
     makeTitle(name)
     makePrice(price)
@@ -79,7 +80,8 @@ function saveOrder(color, quantity) {
         quantity: Number(quantity),
         price: itemPrice,
         imageUrl: imgUrl,
-        altTxt: altText
+        altTxt: altText,
+        name: articleName
     }
     localStorage.setItem(id, JSON.stringify(data))
 }
