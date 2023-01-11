@@ -5,7 +5,6 @@ if (id != null) {
     let itemPrice = 0
     let imgUrl, altText, articleName
 }
-console.log({ id })
  
 fetch(`http://localhost:3000/api/products/${id}`)
 .then((response) => response.json())
@@ -52,7 +51,6 @@ function makeColors(colors) {
     if(select != null) {
         colors.forEach((color) => {
             const option = document.createElement("option")
-            console.log ({ color })
             option.value = color
             option.textContent = color
             select.appendChild(option)
@@ -74,8 +72,9 @@ function handleClick() {
     redirectToCart()
 }
 function saveOrder(color, quantity) {
+    const key = `${id}-${color}`	
     const data = {
-        id: id,
+        id: id, 
         color: color,
         quantity: Number(quantity),
         price: itemPrice,
@@ -83,7 +82,7 @@ function saveOrder(color, quantity) {
         altTxt: altText,
         name: articleName
     }
-    localStorage.setItem(id, JSON.stringify(data))
+    localStorage.setItem(key, JSON.stringify(data))
 }
 
 function isOrderInvalid(color, quantity) {

@@ -9,10 +9,7 @@ fetch("http://localhost:3000/api/products")
         // const name = data[0].name
         // const description = data[0].description
 
-        sofas.forEach((canapé) => {
-            console.log("canapé: ", canapé)
-   
-    
+        sofas.forEach((canapé) => {               
         const {_id, imageUrl, altTxt, name, description} = canapé
         const anchor = makeAnchor(_id)
         const article = document.createElement("article")
