@@ -155,7 +155,7 @@ function makeDescription(item) {
 }
 
 function displayArticle(article) {
-      document.querySelector("#cart__items").appendChild(article)
+    document.querySelector("#cart__items").appendChild(article)
 }
 
 function makeArticle(item) {
@@ -181,10 +181,11 @@ function submitForm(e) {
     if (cart.length === 0) {
         alert("Votre panier est vide")
         return
-    }
+    }    
 
-    if (IsFormInvalid()) return
-
+    if (isFormInvalid()) return
+    if (isEmailInvalid()) return
+    
     const body = makeRequestBody()
     fetch(`http://localhost:3000/api/products/order`, {
         method: "POST",
@@ -193,11 +194,27 @@ function submitForm(e) {
             "Content-Type": "application/json",
         }   
     })
-        .then((response) => response.json())
-        .then((data) => console.log(data))
+        .then((res) => res.json())
+        .then((data) => {
+            const orderId = data.orderId
+            window.location.href = `confirmation.html?orderId=${orderId}`
+            return console.log(data)
+        })
+        .catch((error) => console.log(error))
 }
 
-function isFormInvalid() {   
+function isEmailInvalid() {
+    const email = document.querySelector("#email").value
+    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/
+    if (regex.test(email) === false) {
+        alert("Veuillez remplir un email valide")
+        return true
+    }
+    return false
+}
+
+
+function isFormInvalid() {
     const form = document.querySelector(".cart__order__form")
     const inputs = form.querySelectorAll("input")
     inputs.forEach((input) => {
@@ -227,7 +244,8 @@ function makeRequestBody() {
         },
         products: getIdsFromCache()
     }
-    return body}
+    return body
+}
 
     function getIdsFromCache() {
         const numberOfItems = localStorage.length
@@ -239,3 +257,4 @@ function makeRequestBody() {
         }
         return ids
     }
+
