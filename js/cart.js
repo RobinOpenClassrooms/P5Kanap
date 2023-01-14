@@ -1,11 +1,12 @@
 // Récupérer les données du localStorage + JSONparse pour faire l'inverse du JSONstringify
-
-
+   
 const cart = []
-
 
 retrieveItemsFromCache() 
 cart.forEach((item) => displayItem(item))
+
+const orderButton = document.querySelector("#order")
+orderButton.addEventListener("click", (e) => submitForm(e))
 
 function retrieveItemsFromCache() {
     const numberOfitems = localStorage.length    
@@ -15,8 +16,6 @@ function retrieveItemsFromCache() {
         cart.push(itemObject)
      }
 }
-
-
 
 function displayItem(item) {
     const article = makeArticle(item)
@@ -73,36 +72,43 @@ function addDeleteToSettings(settings, item) {
     const div = document.createElement("div")
     div.classList.add("cart__item__content__settings__delete")
     div.addEventListener("click", () => deleteItem(item))
+
     const p = document.createElement("p")
     p.textContent = "Supprimer"
     div.appendChild(p)
     settings.appendChild(div)
 }
 
-function deleteItem(item) {
+function deleteItem(item) { 
     const itemToDelete = cart.findIndex(
         (product) => product.id === item.id && product.color === item.color
         )
-    cart.splice[itemToDelete, 1]
-    console.log(cart)
-    displayTotalPrice()
-    displayTotalQuantity()
-    deleteDataFromCache(item)
-    deleteArticleFromPage(item)
-}
+        cart.splice(itemToDelete, 1)
+        displayTotalPrice()
+        displayTotalQuantity()
+        deleteDataFromCache(item)
+        deleteArticleFromPage(item)
+    }
 
-function addQuantityToSettings(settings, item) {
-    const quantity = document.createElement("div")
-    quantity.classList.add("cart__item__content__settings__quantity")
-    const p = document.createElement("p")
-    p.textContent = "Qté : "
-    const input = document.createElement("input")
-    input.type = "number"
-    input.classList.add("itemQuantity")
-    input.name ="itemQuantity"
-    input.min = "1"
-    input.max = "100"
-    input.value = item.quantity
+    function deleteArticleFromPage(item) {
+        const articleToDelete = document.querySelector(
+         `article[data-id="${item.id}"][data-color="${item.color}"]`
+        )
+        articleToDelete.remove()
+    }
+    
+    function addQuantityToSettings(settings, item) {
+        const quantity = document.createElement("div")
+        quantity.classList.add("cart__item__content__settings__quantity")
+        const p = document.createElement("p")
+        p.textContent = "Qté : "
+        const input = document.createElement("input")
+        input.type = "number"
+        input.classList.add("itemQuantity")
+        input.name ="itemQuantity"
+        input.min = "1"
+        input.max = "100"
+        input.value = item.quantity
     input.addEventListener("input", () => updatePriceAndQuantity(item.id, input.value, item))
 
     quantity.appendChild(input)
@@ -115,16 +121,10 @@ function updatePriceAndQuantity(id, newValue, item) {
     item.quantity = itemToUpdate.quantity
     displayTotalQuantity()
     displayTotalPrice()
-    deleteDataFromCache(item)
-    deleteArticleFromPage(item)
+    // deleteDataFromCache(item)
+    // deleteArticleFromPage(item)
 }
 
-function deleteArticleFromPage(item) {
-    const articleToDelete = document.querySelector(
-        `article[data-id="${item.id}"][data-color="${item.color}"]`
-    )
-    articleToDelete.remove()
-}
 
 function deleteDataFromCache(item) {
     const key = `${item.id}-${item.color}`
@@ -132,8 +132,8 @@ function deleteDataFromCache(item) {
 }
 
 function saveNewDataToCache(item) {
-    const dataToSave = JSON.stringify(item)
     const key = `${item.id}`-`${item.color}`
+    const dataToSave = JSON.stringify(item)
     localStorage.setItem(key, dataToSave)
 }
 
@@ -156,10 +156,7 @@ function makeDescription(item) {
 
 function displayArticle(article) {
       document.querySelector("#cart__items").appendChild(article)
-      
 }
-
-  
 
 function makeArticle(item) {
     const article = document.createElement("article")
@@ -172,10 +169,73 @@ function makeArticle(item) {
 function makeImageDiv(item) {
     const div = document.createElement("div")
     div.classList.add("cart__item__img")
-
     const image = document.createElement('img')
     image.src = item.imageUrl
     image.alt = item.altTxt
     div.appendChild(image)
     return div
 }
+
+function submitForm(e) {
+    e.preventDefault()
+    if (cart.length === 0) {
+        alert("Votre panier est vide")
+        return
+    }
+
+    if (IsFormInvalid()) return
+
+    const body = makeRequestBody()
+    fetch(`http://localhost:3000/api/products/order`, {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: {
+            "Content-Type": "application/json",
+        }   
+    })
+        .then((response) => response.json())
+        .then((data) => console.log(data))
+}
+
+function isFormInvalid() {   
+    const form = document.querySelector(".cart__order__form")
+    const inputs = form.querySelectorAll("input")
+    inputs.forEach((input) => {
+        if (input.value === "") {
+            alert("Veuillez remplir tous les champs")
+            return true
+        }
+        return false
+    })
+}
+  
+function makeRequestBody() {
+    const form = document.querySelector(".cart__order__form")
+    const firstName = form.elements.firstName.value
+    const lastName = form.elements.lastName.value
+    const address = form.elements.address.value
+    const city = form.elements.city.value
+    const email = form.elements.email.value
+
+    const body = {
+        contact: {
+            firstName: firstName,
+            lastName: lastName,
+            address: address,
+            city: city,
+            email: email
+        },
+        products: getIdsFromCache()
+    }
+    return body}
+
+    function getIdsFromCache() {
+        const numberOfItems = localStorage.length
+        const ids = []
+        for (let i = 0; i < numberOfItems; i++) {
+            const key = localStorage.key(i)
+            const id = key.split("-")[0]
+            ids.push(id)
+        }
+        return ids
+    }
